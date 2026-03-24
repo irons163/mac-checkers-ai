@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>跳棋人機對戰</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --panel: #fff9ef;
+      --dark: #8b5a2b;
+      --light: #f0d9b5;
+      --red: #d62828;
+      --blue: #1d3557;
+      --accent: #118ab2;
+    }
+    body {
+      margin: 0;
+      font-family: "PingFang TC", "Noto Sans TC", sans-serif;
+      background: radial-gradient(circle at top, #fff8e8, var(--bg));
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      color: #222;
+    }
+    .wrap {
+      width: min(92vw, 760px);
+      background: var(--panel);
+      border: 1px solid #e2d4be;
+      border-radius: 14px;
+      box-shadow: 0 10px 26px rgba(52, 34, 12, 0.14);
+      padding: 14px;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    #status {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    button {
+      border: 0;
+      background: #2a9d8f;
+      color: white;
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.06); }
+    canvas {
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 1 / 1;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      border: 1px solid #d4c4a8;
+      background: #f7ecd8;
+    }
+    .tips {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #554833;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div id="status">載入中...</div>
+      <button id="resetBtn">重新開始</button>
+    </div>
+    <canvas id="board" width="640" height="640"></canvas>
+    <div class="tips">你是紅方先手。若可吃子必須吃；可連跳時必須繼續跳。</div>
+  </div>
+
+<script>
+(() => {
+  const BOARD_SIZE = 8;
+  const HUMAN = 'r';
+  const AI = 'b';
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  const statusEl = document.getElementById('status');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const dirs = {
+    r: [[-1, -1], [-1, 1]],
+    b: [[1, -1], [1, 1]],
+    R: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+    B: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+  };
+
+  let board, turn, selected, legalMoves, forcedPiece, gameOver;
+
+  function initBoard() {
+    const b = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(null));
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) if ((r + c) % 2 === 1) b[r][c] = 'b';
+    }
+    for (let r = 5; r < 8; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) if ((r + c) % 2 === 1) b[r][c] = 'r';
+    }
+    return b;
+  }
+
+  function reset() {
+    board = initBoard();
+    turn = HUMAN;
+    selected = null;
+    legalMoves = [];
+    forcedPiece = null;
+    gameOver = false;
+    updateStatus();
+    draw();
+  }
+
+  function inBounds(r, c) {
+    return r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
+  }
+
+  function isPlayerPiece(piece, player) {
+    return piece && piece.toLowerCase() === player;
+  }
+
+  function isOpponent(piece, player) {
+    return piece && piece.toLowerCase() !== player;
+  }
+
+  function getMovesForPiece(state, player, r, c, mustCapture = false) {
+    const piece = state[r][c];
+    if (!isPlayerPiece(piece, player)) return [];
+
+    const captures = [];
+    const normals = [];
+    for (const [dr, dc] of dirs[piece]) {
+      const nr = r + dr;
+      const nc = c + dc;
+      const jr = r + dr * 2;
+      const jc = c + dc * 2;
+
+      if (inBounds(nr, nc) && state[nr][nc] === null && !mustCapture) {
+        normals.push({ sr: r, sc: c, tr: nr, tc: nc, captured: [] });
+      }
+
+      if (inBounds(jr, jc) && inBounds(nr, nc) && isOpponent(state[nr][nc], player) && state[jr][jc] === null) {
+        captures.push({ sr: r, sc: c, tr: jr, tc: jc, captured: [[nr, nc]] });
+      }
+    }
+
+    if (mustCapture) return captures;
+    return captures.length ? captures : normals;
+  }
+
+  function playerHasCapture(state, player) {
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        if (isPlayerPiece(state[r][c], player) && getMovesForPiece(state, player, r, c, true).length) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function getAllMoves(state, player) {
+    const mustCapture = playerHasCapture(state, player);
+    const all = [];
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        if (isPlayerPiece(state[r][c], player)) {
+          all.push(...getMovesForPiece(state, player, r, c, mustCapture));
+        }
+      }
+    }
+    return all;
+  }
+
+  function cloneBoard(state) {
+    return state.map(row => row.slice());
+  }
+
+  function applyMove(state, move) {
+    const b = cloneBoard(state);
+    const piece = b[move.sr][move.sc];
+    b[move.sr][move.sc] = null;
+    b[move.tr][move.tc] = piece;
+    for (const [cr, cc] of move.captured) b[cr][cc] = null;
+
+    if (piece === 'r' && move.tr === 0) b[move.tr][move.tc] = 'R';
+    if (piece === 'b' && move.tr === BOARD_SIZE - 1) b[move.tr][move.tc] = 'B';
+    return b;
+  }
+
+  function getWinner(state) {
+    let reds = 0, blacks = 0;
+    for (const row of state) {
+      for (const p of row) {
+        if (!p) continue;
+        if (p.toLowerCase() === 'r') reds++;
+        else blacks++;
+      }
+    }
+    if (reds === 0) return AI;
+    if (blacks === 0) return HUMAN;
+    if (getAllMoves(state, HUMAN).length === 0) return AI;
+    if (getAllMoves(state, AI).length === 0) return HUMAN;
+    return null;
+  }
+
+  function evaluate(state) {
+    let s = 0;
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        const p = state[r][c];
+        if (!p) continue;
+        if (p === 'b') s += 10 + r * 0.3;
+        else if (p === 'B') s += 17;
+        else if (p === 'r') s -= 10 + (7 - r) * 0.3;
+        else if (p === 'R') s -= 17;
+      }
+    }
+    s += 0.1 * getAllMoves(state, AI).length;
+    s -= 0.1 * getAllMoves(state, HUMAN).length;
+    return s;
+  }
+
+  function minimax(state, depth, alpha, beta, maximizing) {
+    const winner = getWinner(state);
+    if (winner === AI) return 100000;
+    if (winner === HUMAN) return -100000;
+    if (depth === 0) return evaluate(state);
+
+    const player = maximizing ? AI : HUMAN;
+    const moves = getAllMoves(state, player);
+    if (!moves.length) return evaluate(state);
+
+    if (maximizing) {
+      let value = -Infinity;
+      for (const mv of moves) {
+        value = Math.max(value, minimax(applyMove(state, mv), depth - 1, alpha, beta, false));
+        alpha = Math.max(alpha, value);
+        if (beta <= alpha) break;
+      }
+      return value;
+    }
+
+    let value = Infinity;
+    for (const mv of moves) {
+      value = Math.min(value, minimax(applyMove(state, mv), depth - 1, alpha, beta, true));
+      beta = Math.min(beta, value);
+      if (beta <= alpha) break;
+    }
+    return value;
+  }
+
+  function chooseAIMove(state) {
+    const moves = getAllMoves(state, AI);
+    if (!moves.length) return null;
+
+    const depth = 5;
+    let best = moves[0];
+    let bestScore = -Infinity;
+    for (const mv of moves) {
+      const score = minimax(applyMove(state, mv), depth - 1, -Infinity, Infinity, false);
+      if (score > bestScore) {
+        bestScore = score;
+        best = mv;
+      }
+    }
+    return best;
+  }
+
+  function bestLocalCapture(state, captures) {
+    let best = captures[0];
+    let bestScore = -Infinity;
+    for (const mv of captures) {
+      const sc = evaluate(applyMove(state, mv));
+      if (sc > bestScore) {
+        bestScore = sc;
+        best = mv;
+      }
+    }
+    return best;
+  }
+
+  function updateStatus(msg) {
+    if (msg) {
+      statusEl.textContent = msg;
+      return;
+    }
+    if (gameOver) return;
+    if (turn === HUMAN) {
+      statusEl.textContent = forcedPiece ? '你必須用同一顆棋子繼續連跳。' : '你的回合（紅方）';
+    } else {
+      statusEl.textContent = '電腦思考中...';
+    }
+  }
+
+  function draw() {
+    const size = canvas.width / BOARD_SIZE;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        ctx.fillStyle = (r + c) % 2 ? '#8b5a2b' : '#f0d9b5';
+        ctx.fillRect(c * size, r * size, size, size);
+      }
+    }
+
+    if (selected) {
+      const [sr, sc] = selected;
+      ctx.strokeStyle = '#ffd166';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(sc * size + 3, sr * size + 3, size - 6, size - 6);
+    }
+
+    for (const mv of legalMoves) {
+      ctx.strokeStyle = '#4cc9f0';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(mv.tc * size + 6, mv.tr * size + 6, size - 12, size - 12);
+    }
+
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        const p = board[r][c];
+        if (!p) continue;
+        const cx = c * size + size / 2;
+        const cy = r * size + size / 2;
+        const radius = size * 0.36;
+
+        ctx.fillStyle = p.toLowerCase() === 'r' ? '#d62828' : '#1d3557';
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (p === 'R' || p === 'B') {
+          ctx.fillStyle = '#ffeb3b';
+          ctx.font = `bold ${Math.floor(size * 0.34)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('K', cx, cy + 1);
+        }
+      }
+    }
+  }
+
+  function endGame(winner) {
+    gameOver = true;
+    const msg = winner === HUMAN ? '你贏了！' : winner === AI ? '電腦獲勝！' : '平手';
+    updateStatus(msg);
+    draw();
+    setTimeout(() => alert(msg), 10);
+  }
+
+  function humanMove(move) {
+    board = applyMove(board, move);
+
+    if (move.captured.length) {
+      const nextCaps = getMovesForPiece(board, HUMAN, move.tr, move.tc, true);
+      if (nextCaps.length) {
+        forcedPiece = [move.tr, move.tc];
+        selected = [move.tr, move.tc];
+        legalMoves = nextCaps;
+        updateStatus();
+        draw();
+        return;
+      }
+    }
+
+    forcedPiece = null;
+    selected = null;
+    legalMoves = [];
+
+    const winner = getWinner(board);
+    if (winner) return endGame(winner);
+
+    turn = AI;
+    updateStatus();
+    draw();
+    setTimeout(aiTurn, 120);
+  }
+
+  function aiTurn() {
+    if (gameOver || turn !== AI) return;
+
+    let mv = chooseAIMove(board);
+    if (!mv) return endGame(HUMAN);
+
+    board = applyMove(board, mv);
+    let tr = mv.tr;
+    let tc = mv.tc;
+    let captured = mv.captured.length > 0;
+
+    while (captured) {
+      const nextCaps = getMovesForPiece(board, AI, tr, tc, true);
+      if (!nextCaps.length) break;
+      mv = bestLocalCapture(board, nextCaps);
+      board = applyMove(board, mv);
+      tr = mv.tr;
+      tc = mv.tc;
+      captured = mv.captured.length > 0;
+    }
+
+    const winner = getWinner(board);
+    if (winner) return endGame(winner);
+
+    turn = HUMAN;
+    selected = null;
+    legalMoves = [];
+    updateStatus();
+    draw();
+  }
+
+  canvas.addEventListener('click', (e) => {
+    if (gameOver || turn !== HUMAN) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    const size = canvas.width / BOARD_SIZE;
+    const c = Math.floor(x / size);
+    const r = Math.floor(y / size);
+    if (!inBounds(r, c)) return;
+
+    if (forcedPiece) {
+      const candidates = legalMoves.filter(m => m.tr === r && m.tc === c);
+      if (candidates.length) humanMove(candidates[0]);
+      return;
+    }
+
+    const piece = board[r][c];
+    if (isPlayerPiece(piece, HUMAN)) {
+      const mustCapture = playerHasCapture(board, HUMAN);
+      selected = [r, c];
+      legalMoves = getMovesForPiece(board, HUMAN, r, c, mustCapture);
+      draw();
+      return;
+    }
+
+    if (selected) {
+      const candidates = legalMoves.filter(m => m.tr === r && m.tc === c);
+      if (candidates.length) humanMove(candidates[0]);
+    }
+  });
+
+  resetBtn.addEventListener('click', reset);
+  reset();
+})();
+</script>
+</body>
+</html>
