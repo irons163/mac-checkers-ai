@@ -3,6 +3,10 @@
 你剛剛遇到的 `macOS 26 ... required` 是執行環境相容問題。  
 我改成 **瀏覽器版**，不需要 Python/Tk，mac 直接可玩。
 
+## 遊戲畫面
+
+![遊戲截圖](assets/game-screenshot.svg)
+
 ## 啟動方式
 
 1. 在 Finder 進入此資料夾。  

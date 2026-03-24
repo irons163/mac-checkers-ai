@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Checkers game screenshot mock">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff7e8"/>
+      <stop offset="100%" stop-color="#f1e7d8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#bg)"/>
+
+  <rect x="190" y="58" width="900" height="604" rx="20" fill="#fff8ed" stroke="#e5d6bc" filter="url(#shadow)"/>
+  <text x="230" y="108" font-size="34" font-family="Arial, sans-serif" fill="#2b2b2b" font-weight="700">跳棋人機對戰</text>
+  <text x="230" y="146" font-size="22" font-family="Arial, sans-serif" fill="#4a4a4a">你的回合（紅方）</text>
+
+  <rect x="920" y="88" width="136" height="44" rx="9" fill="#2a9d8f"/>
+  <text x="988" y="117" text-anchor="middle" font-size="20" font-family="Arial, sans-serif" fill="#ffffff">重新開始</text>
+
+  <g transform="translate(270,170)">
+    <rect x="0" y="0" width="640" height="640" fill="#f7ecd8" stroke="#d5c5aa"/>
+
+    <g>
+      <script type="application/ecmascript"><![CDATA[]]></script>
+      <rect x="0" y="0" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="80" y="0" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="160" y="0" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="240" y="0" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="320" y="0" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="400" y="0" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="480" y="0" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="560" y="0" width="80" height="80" fill="#8b5a2b"/>
+
+      <rect x="0" y="80" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="80" y="80" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="160" y="80" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="240" y="80" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="320" y="80" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="400" y="80" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="480" y="80" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="560" y="80" width="80" height="80" fill="#f0d9b5"/>
+
+      <rect x="0" y="160" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="80" y="160" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="160" y="160" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="240" y="160" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="320" y="160" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="400" y="160" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="480" y="160" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="560" y="160" width="80" height="80" fill="#8b5a2b"/>
+
+      <rect x="0" y="240" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="80" y="240" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="160" y="240" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="240" y="240" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="320" y="240" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="400" y="240" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="480" y="240" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="560" y="240" width="80" height="80" fill="#f0d9b5"/>
+
+      <rect x="0" y="320" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="80" y="320" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="160" y="320" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="240" y="320" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="320" y="320" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="400" y="320" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="480" y="320" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="560" y="320" width="80" height="80" fill="#8b5a2b"/>
+
+      <rect x="0" y="400" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="80" y="400" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="160" y="400" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="240" y="400" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="320" y="400" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="400" y="400" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="480" y="400" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="560" y="400" width="80" height="80" fill="#f0d9b5"/>
+
+      <rect x="0" y="480" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="80" y="480" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="160" y="480" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="240" y="480" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="320" y="480" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="400" y="480" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="480" y="480" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="560" y="480" width="80" height="80" fill="#8b5a2b"/>
+
+      <rect x="0" y="560" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="80" y="560" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="160" y="560" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="240" y="560" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="320" y="560" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="400" y="560" width="80" height="80" fill="#f0d9b5"/>
+      <rect x="480" y="560" width="80" height="80" fill="#8b5a2b"/>
+      <rect x="560" y="560" width="80" height="80" fill="#f0d9b5"/>
+    </g>
+
+    <g fill="#1d3557" stroke="#111" stroke-width="2">
+      <circle cx="120" cy="40" r="28"/><circle cx="280" cy="40" r="28"/><circle cx="440" cy="40" r="28"/><circle cx="600" cy="40" r="28"/>
+      <circle cx="40" cy="120" r="28"/><circle cx="200" cy="120" r="28"/><circle cx="360" cy="120" r="28"/><circle cx="520" cy="120" r="28"/>
+      <circle cx="120" cy="200" r="28"/><circle cx="280" cy="200" r="28"/><circle cx="440" cy="200" r="28"/><circle cx="600" cy="200" r="28"/>
+    </g>
+
+    <g fill="#d62828" stroke="#111" stroke-width="2">
+      <circle cx="40" cy="520" r="28"/><circle cx="200" cy="520" r="28"/><circle cx="360" cy="520" r="28"/><circle cx="520" cy="520" r="28"/>
+      <circle cx="120" cy="600" r="28"/><circle cx="280" cy="600" r="28"/><circle cx="440" cy="600" r="28"/><circle cx="600" cy="600" r="28"/>
+      <circle cx="40" cy="440" r="28"/><circle cx="200" cy="440" r="28"/><circle cx="360" cy="440" r="28"/><circle cx="520" cy="440" r="28"/>
+    </g>
+
+    <rect x="82" y="442" width="76" height="76" fill="none" stroke="#4cc9f0" stroke-width="4"/>
+    <rect x="2" y="562" width="76" height="76" fill="none" stroke="#ffd166" stroke-width="4"/>
+  </g>
+</svg>
